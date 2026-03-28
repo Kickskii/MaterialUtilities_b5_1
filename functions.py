@@ -839,9 +839,8 @@ def mu_join_objects(self, materials):
 
     return {'FINISHED'}
 
-def mu_set_auto_smooth(self, angle, affect, set_smooth_shading, selected_collection = ""):
-    """Set Auto smooth values for selected objects"""
-    # Inspired by colkai
+def mu_set_auto_smooth(self, angle, affect, set_smooth_shading, selected_collection=""):
+    """Set Auto smooth values for selected objects (Blender 5 safe)"""
 
     objects = []
     objects_affected = 0
@@ -863,25 +862,32 @@ def mu_set_auto_smooth(self, angle, affect, set_smooth_shading, selected_collect
         self.report({'WARNING'}, 'No objects available to set Auto Smooth on')
         return {'CANCELLED'}
 
-    for object in objects:
-        if object.type == "MESH":
-            if set_smooth_shading:
-                for poly in object.data.polygons:
-                    poly.use_smooth = True
+    for obj in objects:
+        if obj is None or obj.type != "MESH":
+            continue
 
-                #bpy.ops.object.shade_smooth()
+        # ✅ Ensure object is active & selected (important for operator)
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
 
-            object.data.use_auto_smooth = 1
-            object.data.auto_smooth_angle = angle  # 35 degrees as radians
+        # ✅ Optional smooth shading
+        if set_smooth_shading:
+            for poly in obj.data.polygons:
+                poly.use_smooth = True
 
-            objects_affected += 1
+        # ✅ The ACTUAL Blender 5 way
+        bpy.ops.object.shade_auto_smooth(angle=angle)
 
-    self.report({'INFO'},
-                'Auto smooth angle set to %.0f° on %d of %d objects' %
-                 (degrees(angle), objects_affected, len(objects)))
+        objects_affected += 1
+
+    self.report(
+        {'INFO'},
+        'Auto smooth applied to %d of %d objects' %
+        (objects_affected, len(objects))
+    )
 
     return {'FINISHED'}
-
+    
 def mu_remove_unused_materials(self):
     """Remove any unused (zero users) materials"""
     # By request by Hologram
