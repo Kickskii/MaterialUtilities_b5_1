@@ -1,3 +1,5 @@
+note this is a simple fork of the material utilities addon because the one on extension platform was missing some features which i wanted from the older material utilities addon, the functions code was adjusted to work with blender 5.1 since that was the only part that needed tuneups, this repo is a reflection of those changes
+
 # Material utilities v3.0.2 (Stable)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
